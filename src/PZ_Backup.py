@@ -1,10 +1,10 @@
 import sys, shutil, os, datetime, re, threading
-import tkinter as tk
-from tkinter import messagebox, filedialog, ttk
 from enum import Enum
 from pathlib import Path
 
-import sv_ttk, darkdetect
+import tkinter as tk
+from tkinter import messagebox, filedialog, ttk
+import sv_ttk
 
 # args
 
