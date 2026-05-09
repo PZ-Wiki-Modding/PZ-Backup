@@ -56,10 +56,12 @@ def validate_folder(path: Path, type: FolderType) -> bool:
     if type == FolderType.INSTALL:
         # the install folder should contain:
         # - a folder "media"
-        # - a file "projectzomboid.jar"
-        # - is in steamapps/common
+        # - a file "ProjectZomboid32.json"
+        # - a file "ProjectZomboid64.json"
+        # - and is in steamapps/common
         if ((path / "media").is_dir() 
-            and (path / "projectzomboid.jar").is_file()):
+            and (path / "ProjectZomboid32.json").is_file()
+            and (path / "ProjectZomboid64.json").is_file()):
             # verify the path contains "steamapps/common"
             if "steamapps/common" not in str(path):
                 return False
