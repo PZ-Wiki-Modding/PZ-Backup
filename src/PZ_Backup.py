@@ -173,9 +173,21 @@ def parse_workshop_mods(path: Path, mod_ids) -> dict[str, Path]:
                     mod_id = m.group("mod_id").strip()
                     if mod_id in mod_ids:
                         # we found a mod that is currently loaded, find its mods path
-                        while re.search(r"108600/\d+/mods$", str(mod_info_file)) is None:
-                            mod_info_file = mod_info_file.parent
-                        mod_id_to_name[mod_id] = mod_info_file
+                        i = 0
+                        mod_folder = mod_info_file
+
+                        # surely no one has their workshop installs in 50 depth nested folder, right ???
+                        while (re.search(r"108600/\d+/mods$", str(mod_folder)) is None 
+                               and mod_folder != mod_folder.parent 
+                               and i < 50):
+                            i += 1 # safeguard to avoid infinite loop
+                            mod_folder = mod_folder.parent
+
+                        # if we didn't ffind the mods folder, we skip this mod and log it
+                        if mod_folder == mod_folder.parent:
+                            log("Couldn't find the mods folder for mod id {} in workshop. Skipping it".format(mod_id))
+                            continue
+                        mod_id_to_name[mod_folder] = mod_id
         except Exception as e:
             log("Error parsing mod info file {}: {}".format(mod_info_file, e))
     return mod_id_to_name
@@ -248,9 +260,9 @@ def run():
     mod_id_to_name = parse_workshop_mods(pz_workshop_path, mod_ids)
 
     # copy the mods folders of the loaded workshop mods to the cache folder mods folder
-    for mod_id, mod_info_file in mod_id_to_name.items():
-        log("Copying mod {} with id {}".format(mod_info_file, mod_id))
-        shutil.copytree(mod_info_file, pz_backup_path / "cache" / "mods", dirs_exist_ok=True)
+    for mod_folder, mod_id in mod_id_to_name.items():
+        log("Copying mod {} with id {}".format(mod_folder, mod_id))
+        shutil.copytree(mod_folder, pz_backup_path / "cache" / "mods", dirs_exist_ok=True)
 
     # create the launch script for Linux and Windows to launch the game
     # in no Steam mode and linking to the backup cache folder
