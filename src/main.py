@@ -35,6 +35,19 @@ pz_backup_path = Path(DEFAULT_BACKUP_DIR).expanduser()
 pz_backup_name_entry = None
 log_text = None
 
+
+def log(message: str):
+    """
+    Write a message to the log panel
+    """
+    global log_text
+    if log_text is not None:
+        log_text.config(state=tk.NORMAL)
+        log_text.insert(tk.END, message + "\n")
+        log_text.see(tk.END)  # auto-scroll to bottom
+        log_text.config(state=tk.DISABLED)
+    print(message)
+
 def validate_folder(path: Path, type: FolderType) -> bool:
     """
     Validate the various folders based on their type. Conditions depends on the type of the folder.
@@ -152,25 +165,13 @@ def parse_workshop_mods(path: Path, mod_ids) -> dict[str, Path]:
                 if m:
                     mod_id = m.group("mod_id").strip()
                     if mod_id in mod_ids:
-                        print("found mod id", mod_id, "in mod.info file", mod_info_file)
                         # we found a mod that is currently loaded, find its mods path
                         while re.search(r"108600/\d+/mods$", str(mod_info_file)) is None:
                             mod_info_file = mod_info_file.parent
                         mod_id_to_name[mod_id] = mod_info_file
         except Exception as e:
-            print("Error parsing mod info file", mod_info_file, e)
+            log("Error parsing mod info file {}: {}".format(mod_info_file, e))
     return mod_id_to_name
-
-def log(message: str):
-    """
-    Write a message to the log panel
-    """
-    global log_text
-    if log_text is not None:
-        log_text.config(state=tk.NORMAL)
-        log_text.insert(tk.END, message + "\n")
-        log_text.see(tk.END)  # auto-scroll to bottom
-        log_text.config(state=tk.DISABLED)
 
 def run():
     """
@@ -232,12 +233,43 @@ def run():
         log("Copying mod {} with id {}".format(mod_info_file, mod_id))
         shutil.copytree(mod_info_file, pz_backup_path / "cache" / "mods", dirs_exist_ok=True)
 
+    # create the launch script for Linux and Windows to launch the game
+    # in no Steam mode and linking to the backup cache folder
+    if sys.platform.startswith("linux"):
+        shutil.move(pz_backup_path / "install" / "projectzomboid.sh", pz_backup_path / "install" / "old_projectzomboid.sh")
+        launch_script_path = pz_backup_path / "projectzomboid.sh"
+        with open(launch_script_path, "w") as f:
+            f.write(f"""#!/bin/bash
+./install/old_projectzomboid.sh -cachedir="{pz_backup_path / "cache"}" -nosteam "$@"
+""")
+        os.chmod(launch_script_path, 0o755)
+        log("Created launch script for Linux at {}".format(launch_script_path))
+    else:
+        # 32-bit
+        shutil.move(pz_backup_path / "install" / "ProjectZomboid32.bat", pz_backup_path / "install" / "old_ProjectZomboid32.bat")
+        launch_script_path_32 = pz_backup_path / "ProjectZomboid32.bat"
+        with open(launch_script_path_32, "w") as f:
+            f.write(f"""@echo off
+install\\old_ProjectZomboid32.exe -cachedir="{pz_backup_path / "cache"}" -nosteam %*
+""")
+        log("Created launch script for Windows at {}".format(launch_script_path_32))
+
+        # 64-bit
+        shutil.move(pz_backup_path / "install" / "ProjectZomboid64.bat", pz_backup_path / "install" / "old_ProjectZomboid64.bat")
+        launch_script_path_64 = pz_backup_path / "ProjectZomboid64.bat"
+        with open(launch_script_path_64, "w") as f:
+            f.write(f"""@echo off
+install\\old_ProjectZomboid64.exe -cachedir="{pz_backup_path / "cache"}" -nosteam %*
+""")
+        log("Created launch script for Windows at {}".format(launch_script_path_64))
+
     messagebox.showinfo("Success", "Backup completed successfully!")
 
 def main():
     global pz_install_path, pz_cache_path, pz_backup_path, pz_backup_name_entry, log_text
 
     root = tk.Tk()
+    root.title("Project Zomboid Backup Tool")
     # root.geometry("400x300")
     ttk.Label(root, text="Project Zomboid Backup Tool", font=("Arial", 16, "bold")).pack(pady=10)
 
