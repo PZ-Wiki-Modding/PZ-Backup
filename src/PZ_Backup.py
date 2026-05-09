@@ -1,6 +1,6 @@
 import sys, shutil, os, datetime, re, threading
 from enum import Enum
-from pathlib import Path
+from pathlib import Path, PurePath
 
 import tkinter as tk
 from tkinter import messagebox, filedialog, ttk
@@ -175,7 +175,8 @@ def parse_workshop_mods(path: Path, mod_ids) -> dict[str, Path]:
                         mod_folder = mod_info_file
 
                         # surely no one has their workshop installs in 50 depth nested folder, right ???
-                        while (re.search(r"108600/\d+/mods$", str(mod_folder).replace("\\", "/")) is None 
+                        while (#re.search(r"108600/\d+/mods$", str(mod_folder).replace("\\", "/")) is None 
+                               mod_folder.match('**/108600/*/mods') is not True
                                and mod_folder != mod_folder.parent 
                                and i < 50):
                             i += 1 # safeguard to avoid infinite loop
