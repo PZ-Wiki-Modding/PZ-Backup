@@ -9,5 +9,4 @@ help:
 	@echo "  build  - Build the app"
 
 build:
-	source .venv/bin/activate
 	pyinstaller --onefile --windowed src/PZ_Backup.py
