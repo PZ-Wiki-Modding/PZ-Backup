@@ -17,7 +17,7 @@ if sys.platform.startswith("linux"):
 else:
     # default to windows path, since it's more common
     DEFAULT_BACKUP_DIR = "%UserProfile%/PZ_Backups"
-    DEFAULT_PZ_PATH = "C:/Program Files (x86)/Steam/steamapps/common/Project Zomboid"
+    DEFAULT_PZ_PATH = "C:/Program Files (x86)/Steam/steamapps/common/ProjectZomboid"
     DEFAULT_PZ_CACHE = "%UserProfile%/Zomboid"
 DEFAULT_BACKUP_NAME = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
