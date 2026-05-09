@@ -29,9 +29,9 @@ class FolderType(Enum):
 
 
 
-pz_install_path = Path(DEFAULT_PZ_PATH).expanduser()
-pz_cache_path = Path(DEFAULT_PZ_CACHE).expanduser()
-pz_backup_path = Path(DEFAULT_BACKUP_DIR).expanduser()
+pz_install_path = Path(DEFAULT_PZ_PATH).expanduser().resolve()
+pz_cache_path = Path(DEFAULT_PZ_CACHE).expanduser().resolve()
+pz_backup_path = Path(DEFAULT_BACKUP_DIR).expanduser().resolve()
 pz_backup_name_entry = None
 log_text = None
 
@@ -118,7 +118,7 @@ def select_folder(type: FolderType, entry: ttk.Entry):
             raise ValueError("Unknown folder type")
         folder = filedialog.askdirectory(title="Select your Project Zomboid installation folder", initialdir=initialdir)
         if folder:  # user didn't cancel
-            folder = Path(folder)
+            folder = Path(folder).resolve()
             # validate the folder
             if validate_folder(folder, type):
                 # update the entry field
