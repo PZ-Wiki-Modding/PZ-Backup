@@ -272,7 +272,9 @@ install\\old_ProjectZomboid64.exe -cachedir="{pz_backup_path / "cache"}" -nostea
 """)
         log("Created launch script for Windows at {}".format(launch_script_path_64))
 
+    log("Backup completed successfully!")
     messagebox.showinfo("Success", "Backup completed successfully!")
+    log("")
 
 
 ## MAIN
