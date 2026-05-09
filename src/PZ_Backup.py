@@ -220,6 +220,7 @@ def run():
     os.makedirs(pz_backup_path, exist_ok=True)
 
     # copy the install folder
+    log("Copying installation folder...")
     to_copy_install = pz_install_path
     if sys.platform.startswith("linux"):
         # on linux we need to copy the parent folder, bcs it contains the launch script
@@ -228,6 +229,7 @@ def run():
     log("Copied installation folder from {} to {}".format(to_copy_install, pz_backup_path / "install"))
 
     # copy the cache folder
+    log("Copying cache folder...")
     shutil.copytree(pz_cache_path, pz_backup_path / "cache", dirs_exist_ok=True)
     log("Copied cache folder from {} to {}".format(pz_cache_path, pz_backup_path / "cache"))
 
@@ -253,7 +255,7 @@ def run():
         log("Created launch script for Linux at {}".format(launch_script_path))
     else:
         # 32-bit
-        shutil.move(pz_backup_path / "install" / "ProjectZomboid32.bat", pz_backup_path / "install" / "old_ProjectZomboid32.bat")
+        shutil.move(pz_backup_path / "install" / "ProjectZomboid32.exe", pz_backup_path / "install" / "old_ProjectZomboid32.exe")
         launch_script_path_32 = pz_backup_path / "ProjectZomboid32.bat"
         with open(launch_script_path_32, "w") as f:
             f.write(f"""@echo off
@@ -262,7 +264,7 @@ install\\old_ProjectZomboid32.exe -cachedir="{pz_backup_path / "cache"}" -nostea
         log("Created launch script for Windows at {}".format(launch_script_path_32))
 
         # 64-bit
-        shutil.move(pz_backup_path / "install" / "ProjectZomboid64.bat", pz_backup_path / "install" / "old_ProjectZomboid64.bat")
+        shutil.move(pz_backup_path / "install" / "ProjectZomboid64.exe", pz_backup_path / "install" / "old_ProjectZomboid64.exe")
         launch_script_path_64 = pz_backup_path / "ProjectZomboid64.bat"
         with open(launch_script_path_64, "w") as f:
             f.write(f"""@echo off
