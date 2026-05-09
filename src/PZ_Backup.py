@@ -285,24 +285,24 @@ def run():
     # in no Steam mode and linking to the backup cache folder
     try:
         if sys.platform.startswith("linux"):
-            shutil.move(pz_backup_path / "install" / "projectzomboid.sh", pz_backup_path / "install" / "old_projectzomboid.sh")
+            shutil.move(pz_backup_path / "install" / "projectzomboid.sh", pz_backup_path / "install" / "original_projectzomboid.sh")
             launch_script_path = pz_backup_path / "projectzomboid.sh"
             with open(launch_script_path, "w") as f:
                 f.write(f"""#!/bin/bash
-    ./install/old_projectzomboid.sh -cachedir="{pz_backup_path / "cache"}" -nosteam "$@"
-    """)
+./install/original_projectzomboid.sh -cachedir="{pz_backup_path / "cache"}" -nosteam "$@"
+""")
             os.chmod(launch_script_path, 0o755)
             log("Created launch script for Linux at {}".format(launch_script_path), LogColor.SUCCESS)
         else:
             # 32-bit isn't supported in B42 and tbf who tf uses it still
 
             # 64-bit
-            shutil.move(pz_backup_path / "install" / "ProjectZomboid64.exe", pz_backup_path / "install" / "old_ProjectZomboid64.exe")
+            shutil.move(pz_backup_path / "install" / "ProjectZomboid64.exe", pz_backup_path / "install" / "original_ProjectZomboid64.exe")
             launch_script_path_64 = pz_backup_path / "ProjectZomboid64.bat"
             with open(launch_script_path_64, "w") as f:
                 f.write(f"""@echo off
-    install\\old_ProjectZomboid64.exe -cachedir="{pz_backup_path / "cache"}" -nosteam %*
-    """)
+install\\original_ProjectZomboid64.exe -cachedir="{pz_backup_path / "cache"}" -nosteam %*
+""")
             log("Created launch script for Windows at {}".format(launch_script_path_64), LogColor.SUCCESS)
     except Exception as e:
         log("Error creating launch script: {}".format(e), LogColor.ERROR)
