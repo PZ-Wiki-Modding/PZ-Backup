@@ -14,12 +14,12 @@ jobs:
         include:
           - os: Linux
             runner: ubuntu-latest
-            artifact_name: main
-            asset_name: main-linux
+            artifact_name: PZ_Backup
+            asset_name: PZ_Backup-linux
           - os: Windows
             runner: windows-latest
-            artifact_name: main.exe
-            asset_name: main-windows.exe
+            artifact_name: PZ_Backup.exe
+            asset_name: PZ_Backup-windows.exe
     
     steps:
       - name: Checkout code

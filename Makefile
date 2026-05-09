@@ -10,4 +10,4 @@ help:
 
 build:
 	source .venv/bin/activate
-	pyinstaller --onefile --windowed src/main.py
+	pyinstaller --onefile --windowed src/PZ_Backup.py
