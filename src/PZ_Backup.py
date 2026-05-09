@@ -6,19 +6,21 @@ import tkinter as tk
 from tkinter import messagebox, filedialog, ttk
 import sv_ttk
 
-# args
+## ARGS
+
+home = Path.home()
 
 # if windows
 # if sys.platform.startswith("win"):
 if sys.platform.startswith("linux"):
-    DEFAULT_BACKUP_DIR = "~/PZ_Backups"
-    DEFAULT_PZ_PATH = "~/.steam/steam/steamapps/common/ProjectZomboid/projectzomboid"
-    DEFAULT_PZ_CACHE = "~/Zomboid"
+    DEFAULT_BACKUP_DIR = home / "PZ_Backups"
+    DEFAULT_PZ_PATH = home / ".steam/steam/steamapps/common/ProjectZomboid/projectzomboid"
+    DEFAULT_PZ_CACHE = home / "Zomboid"
 else:
     # default to windows path, since it's more common
-    DEFAULT_BACKUP_DIR = "%UserProfile%/PZ_Backups"
+    DEFAULT_BACKUP_DIR = home / "PZ_Backups"
     DEFAULT_PZ_PATH = "C:/Program Files (x86)/Steam/steamapps/common/ProjectZomboid"
-    DEFAULT_PZ_CACHE = "%UserProfile%/Zomboid"
+    DEFAULT_PZ_CACHE = home / "Zomboid"
 DEFAULT_BACKUP_NAME = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 
@@ -28,13 +30,16 @@ class FolderType(Enum):
     BACKUP = "backup"
 
 
+## INIT
 
-pz_install_path = Path(DEFAULT_PZ_PATH).expanduser().resolve()
-pz_cache_path = Path(DEFAULT_PZ_CACHE).expanduser().resolve()
-pz_backup_path = Path(DEFAULT_BACKUP_DIR).expanduser().resolve()
+pz_install_path = Path(DEFAULT_PZ_PATH).expanduser()
+pz_cache_path = Path(DEFAULT_PZ_CACHE).expanduser()
+pz_backup_path = Path(DEFAULT_BACKUP_DIR).expanduser()
 pz_backup_name_entry = None
 log_text = None
 
+
+## METHODS
 
 def log(message: str):
     """
@@ -266,6 +271,9 @@ install\\old_ProjectZomboid64.exe -cachedir="{pz_backup_path / "cache"}" -nostea
         log("Created launch script for Windows at {}".format(launch_script_path_64))
 
     messagebox.showinfo("Success", "Backup completed successfully!")
+
+
+## MAIN
 
 def main():
     global pz_install_path, pz_cache_path, pz_backup_path, pz_backup_name_entry, log_text
