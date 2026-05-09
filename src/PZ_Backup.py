@@ -63,7 +63,7 @@ def validate_folder(path: Path, type: FolderType) -> bool:
             and (path / "ProjectZomboid32.json").is_file()
             and (path / "ProjectZomboid64.json").is_file()):
             # verify the path contains "steamapps/common"
-            if "steamapps/common" not in str(path):
+            if "steamapps/common" not in str(path).replace("\\", "/"):
                 return False
             return True  # valid folder
         else:
