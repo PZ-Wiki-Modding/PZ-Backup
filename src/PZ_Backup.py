@@ -177,7 +177,7 @@ def parse_workshop_mods(path: Path, mod_ids) -> dict[str, Path]:
                         mod_folder = mod_info_file
 
                         # surely no one has their workshop installs in 50 depth nested folder, right ???
-                        while (re.search(r"108600/\d+/mods$", str(mod_folder)) is None 
+                        while (re.search(r"108600/\d+/mods$", str(mod_folder).replace("\\", "/")) is None 
                                and mod_folder != mod_folder.parent 
                                and i < 50):
                             i += 1 # safeguard to avoid infinite loop
@@ -237,6 +237,7 @@ def run():
     if sys.platform.startswith("linux"):
         # on linux we need to copy the parent folder, bcs it contains the launch script
         to_copy_install = pz_install_path.parent
+
     try:
         shutil.copytree(to_copy_install, pz_backup_path / "install", dirs_exist_ok=True)
     except Exception as e:
@@ -262,37 +263,47 @@ def run():
     # copy the mods folders of the loaded workshop mods to the cache folder mods folder
     for mod_folder, mod_id in mod_id_to_name.items():
         log("Copying mod {} with id {}".format(mod_folder, mod_id))
-        shutil.copytree(mod_folder, pz_backup_path / "cache" / "mods", dirs_exist_ok=True)
+        try:
+            shutil.copytree(mod_folder, pz_backup_path / "cache" / "mods", dirs_exist_ok=True)
+        except Exception as e:
+            log("Error copying mod {}: {}".format(mod_folder, e))
+            messagebox.showerror("Error", "Error copying mod {}: {}".format(mod_folder, e))
+            return
 
     # create the launch script for Linux and Windows to launch the game
     # in no Steam mode and linking to the backup cache folder
-    if sys.platform.startswith("linux"):
-        shutil.move(pz_backup_path / "install" / "projectzomboid.sh", pz_backup_path / "install" / "old_projectzomboid.sh")
-        launch_script_path = pz_backup_path / "projectzomboid.sh"
-        with open(launch_script_path, "w") as f:
-            f.write(f"""#!/bin/bash
-./install/old_projectzomboid.sh -cachedir="{pz_backup_path / "cache"}" -nosteam "$@"
-""")
-        os.chmod(launch_script_path, 0o755)
-        log("Created launch script for Linux at {}".format(launch_script_path))
-    else:
-        # 32-bit
-        shutil.move(pz_backup_path / "install" / "ProjectZomboid32.exe", pz_backup_path / "install" / "old_ProjectZomboid32.exe")
-        launch_script_path_32 = pz_backup_path / "ProjectZomboid32.bat"
-        with open(launch_script_path_32, "w") as f:
-            f.write(f"""@echo off
-install\\old_ProjectZomboid32.exe -cachedir="{pz_backup_path / "cache"}" -nosteam %*
-""")
-        log("Created launch script for Windows at {}".format(launch_script_path_32))
+    try:
+        if sys.platform.startswith("linux"):
+            shutil.move(pz_backup_path / "install" / "projectzomboid.sh", pz_backup_path / "install" / "old_projectzomboid.sh")
+            launch_script_path = pz_backup_path / "projectzomboid.sh"
+            with open(launch_script_path, "w") as f:
+                f.write(f"""#!/bin/bash
+    ./install/old_projectzomboid.sh -cachedir="{pz_backup_path / "cache"}" -nosteam "$@"
+    """)
+            os.chmod(launch_script_path, 0o755)
+            log("Created launch script for Linux at {}".format(launch_script_path))
+        else:
+            # 32-bit
+            shutil.move(pz_backup_path / "install" / "ProjectZomboid32.exe", pz_backup_path / "install" / "old_ProjectZomboid32.exe")
+            launch_script_path_32 = pz_backup_path / "ProjectZomboid32.bat"
+            with open(launch_script_path_32, "w") as f:
+                f.write(f"""@echo off
+    install\\old_ProjectZomboid32.exe -cachedir="{pz_backup_path / "cache"}" -nosteam %*
+    """)
+            log("Created launch script for Windows at {}".format(launch_script_path_32))
 
-        # 64-bit
-        shutil.move(pz_backup_path / "install" / "ProjectZomboid64.exe", pz_backup_path / "install" / "old_ProjectZomboid64.exe")
-        launch_script_path_64 = pz_backup_path / "ProjectZomboid64.bat"
-        with open(launch_script_path_64, "w") as f:
-            f.write(f"""@echo off
-install\\old_ProjectZomboid64.exe -cachedir="{pz_backup_path / "cache"}" -nosteam %*
-""")
-        log("Created launch script for Windows at {}".format(launch_script_path_64))
+            # 64-bit
+            shutil.move(pz_backup_path / "install" / "ProjectZomboid64.exe", pz_backup_path / "install" / "old_ProjectZomboid64.exe")
+            launch_script_path_64 = pz_backup_path / "ProjectZomboid64.bat"
+            with open(launch_script_path_64, "w") as f:
+                f.write(f"""@echo off
+    install\\old_ProjectZomboid64.exe -cachedir="{pz_backup_path / "cache"}" -nosteam %*
+    """)
+            log("Created launch script for Windows at {}".format(launch_script_path_64))
+    except Exception as e:
+        log("Error creating launch script: {}".format(e))
+        messagebox.showerror("Error", "Error creating launch script: {}".format(e))
+        return
 
     log("Backup completed successfully!")
     messagebox.showinfo("Success", "Backup completed successfully!")
