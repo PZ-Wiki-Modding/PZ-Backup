@@ -61,11 +61,9 @@ def validate_folder(path: Path, type: FolderType) -> bool:
     if type == FolderType.INSTALL:
         # the install folder should contain:
         # - a folder "media"
-        # - a file "ProjectZomboid32.json"
         # - a file "ProjectZomboid64.json"
         # - and is in steamapps/common
         if ((path / "media").is_dir() 
-            and (path / "ProjectZomboid32.json").is_file()
             and (path / "ProjectZomboid64.json").is_file()):
             # verify the path contains "steamapps/common"
             if "steamapps/common" not in str(path).replace("\\", "/"):
@@ -283,14 +281,7 @@ def run():
             os.chmod(launch_script_path, 0o755)
             log("Created launch script for Linux at {}".format(launch_script_path))
         else:
-            # 32-bit
-            shutil.move(pz_backup_path / "install" / "ProjectZomboid32.exe", pz_backup_path / "install" / "old_ProjectZomboid32.exe")
-            launch_script_path_32 = pz_backup_path / "ProjectZomboid32.bat"
-            with open(launch_script_path_32, "w") as f:
-                f.write(f"""@echo off
-    install\\old_ProjectZomboid32.exe -cachedir="{pz_backup_path / "cache"}" -nosteam %*
-    """)
-            log("Created launch script for Windows at {}".format(launch_script_path_32))
+            # 32-bit isn't supported in B42 and tbf who tf uses it still
 
             # 64-bit
             shutil.move(pz_backup_path / "install" / "ProjectZomboid64.exe", pz_backup_path / "install" / "old_ProjectZomboid64.exe")
