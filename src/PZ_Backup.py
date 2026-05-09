@@ -24,7 +24,15 @@ else:
 DEFAULT_BACKUP_NAME = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 
+class LogColor(Enum):
+    """Provide enums for log colors/types to use in the log panel."""
+    INFO = "info"
+    SUCCESS = "success"
+    ERROR = "error"
+
+
 class FolderType(Enum):
+    """Provide enums for the different types of folders we need to select and validate."""
     INSTALL = "install"
     CACHE = "cache"
     BACKUP = "backup"
@@ -41,14 +49,18 @@ log_text = None
 
 ## METHODS
 
-def log(message: str):
+def log(message: str, color: LogColor = LogColor.INFO):
     """
-    Write a message to the log panel
+    Write a message to the log panel with optional color.
+    
+    Args:
+        message: The message to log
+        color: The color/type of the log (INFO, SUCCESS, or ERROR)
     """
     global log_text
     if log_text is not None:
         log_text.config(state=tk.NORMAL)
-        log_text.insert(tk.END, message + "\n")
+        log_text.insert(tk.END, message + "\n", color.value)
         log_text.see(tk.END)  # auto-scroll to bottom
         log_text.config(state=tk.DISABLED)
     print(message)
@@ -184,11 +196,11 @@ def parse_workshop_mods(path: Path, mod_ids) -> dict[str, Path]:
 
                         # if we didn't ffind the mods folder, we skip this mod and log it
                         if mod_folder == mod_folder.parent:
-                            log("Couldn't find the mods folder for mod id {} in workshop. Skipping it".format(mod_id))
+                            log("Couldn't find the mods folder for mod id {} in workshop. Skipping it".format(mod_id), LogColor.ERROR)
                             continue
                         mod_id_to_name[mod_folder] = mod_id
         except Exception as e:
-            log("Error parsing mod info file {}: {}".format(mod_info_file, e))
+            log("Error parsing mod info file {}: {}".format(mod_info_file, e), LogColor.ERROR)
     return mod_id_to_name
 
 def run():
@@ -200,7 +212,7 @@ def run():
     pz_backup_name = pz_backup_name_entry.get().strip()
 
     log("Starting backup with installation folder: {}, cache folder: {}, backup folder: {}, backup name: {}".format(
-        pz_install_path, pz_cache_path, pz_backup_path, pz_backup_name))
+        pz_install_path, pz_cache_path, pz_backup_path, pz_backup_name), LogColor.INFO)
 
     # verify the provided folders are correct
     if not validate_folder(pz_install_path, FolderType.INSTALL):
@@ -231,7 +243,7 @@ def run():
     os.makedirs(pz_backup_path, exist_ok=True)
 
     # copy the install folder
-    log("Copying installation folder... (this can take some time)")
+    log("Copying installation folder... (this can take some time)", LogColor.INFO)
     to_copy_install = pz_install_path
     if sys.platform.startswith("linux"):
         # on linux we need to copy the parent folder, bcs it contains the launch script
@@ -240,20 +252,20 @@ def run():
     try:
         shutil.copytree(to_copy_install, pz_backup_path / "install", dirs_exist_ok=True)
     except Exception as e:
-        log("Error copying installation folder: {}".format(e))
+        log("Error copying installation folder: {}".format(e), LogColor.ERROR)
         messagebox.showerror("Error", "Error copying installation folder: {}".format(e))
         return
-    log("Copied installation folder from {} to {}".format(to_copy_install, pz_backup_path / "install"))
+    log("Copied installation folder from {} to {}".format(to_copy_install, pz_backup_path / "install"), LogColor.SUCCESS)
 
     # copy the cache folder
-    log("Copying cache folder... (this can take some time)")
+    log("Copying cache folder... (this can take some time)", LogColor.INFO)
     try:
         shutil.copytree(pz_cache_path, pz_backup_path / "cache", dirs_exist_ok=True)
     except Exception as e:
-        log("Error copying cache folder: {}".format(e))
+        log("Error copying cache folder: {}".format(e), LogColor.ERROR)
         messagebox.showerror("Error", "Error copying cache folder: {}".format(e))
         return
-    log("Copied cache folder from {} to {}".format(pz_cache_path, pz_backup_path / "cache"))
+    log("Copied cache folder from {} to {}".format(pz_cache_path, pz_backup_path / "cache"), LogColor.SUCCESS)
 
     # load and find mods 
     mod_ids = parse_default_mods(pz_cache_path)
@@ -261,11 +273,11 @@ def run():
 
     # copy the mods folders of the loaded workshop mods to the cache folder mods folder
     for mod_folder, mod_id in mod_id_to_name.items():
-        log("Copying mod {} with id {}".format(mod_folder, mod_id))
+        log("Copying mod {} with id {}".format(mod_folder, mod_id), LogColor.INFO)
         try:
             shutil.copytree(mod_folder, pz_backup_path / "cache" / "mods", dirs_exist_ok=True)
         except Exception as e:
-            log("Error copying mod {}: {}".format(mod_folder, e))
+            log("Error copying mod {}: {}".format(mod_folder, e), LogColor.ERROR)
             messagebox.showerror("Error", "Error copying mod {}: {}".format(mod_folder, e))
             return
 
@@ -280,7 +292,7 @@ def run():
     ./install/old_projectzomboid.sh -cachedir="{pz_backup_path / "cache"}" -nosteam "$@"
     """)
             os.chmod(launch_script_path, 0o755)
-            log("Created launch script for Linux at {}".format(launch_script_path))
+            log("Created launch script for Linux at {}".format(launch_script_path), LogColor.SUCCESS)
         else:
             # 32-bit isn't supported in B42 and tbf who tf uses it still
 
@@ -291,15 +303,15 @@ def run():
                 f.write(f"""@echo off
     install\\old_ProjectZomboid64.exe -cachedir="{pz_backup_path / "cache"}" -nosteam %*
     """)
-            log("Created launch script for Windows at {}".format(launch_script_path_64))
+            log("Created launch script for Windows at {}".format(launch_script_path_64), LogColor.SUCCESS)
     except Exception as e:
-        log("Error creating launch script: {}".format(e))
+        log("Error creating launch script: {}".format(e), LogColor.ERROR)
         messagebox.showerror("Error", "Error creating launch script: {}".format(e))
         return
 
-    log("Backup completed successfully!")
+    log("Backup completed successfully!", LogColor.SUCCESS)
     messagebox.showinfo("Success", "Backup completed successfully!")
-    log("")
+    log("", LogColor.INFO)
 
 
 ## MAIN
@@ -370,6 +382,11 @@ def main():
     log_scrollbar = ttk.Scrollbar(log_frame, command=log_text.yview)
     log_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
     log_text.config(yscrollcommand=log_scrollbar.set)
+    
+    # Configure text tags for different log colors
+    log_text.tag_config(LogColor.INFO.value, foreground="white")
+    log_text.tag_config(LogColor.SUCCESS.value, foreground="#00ff00")
+    log_text.tag_config(LogColor.ERROR.value, foreground="#ff0000")
 
 
 
