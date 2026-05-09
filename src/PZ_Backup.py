@@ -220,17 +220,27 @@ def run():
     os.makedirs(pz_backup_path, exist_ok=True)
 
     # copy the install folder
-    log("Copying installation folder...")
+    log("Copying installation folder... (this can take some time)")
     to_copy_install = pz_install_path
     if sys.platform.startswith("linux"):
         # on linux we need to copy the parent folder, bcs it contains the launch script
         to_copy_install = pz_install_path.parent
-    shutil.copytree(to_copy_install, pz_backup_path / "install", dirs_exist_ok=True)
+    try:
+        shutil.copytree(to_copy_install, pz_backup_path / "install", dirs_exist_ok=True)
+    except Exception as e:
+        log("Error copying installation folder: {}".format(e))
+        messagebox.showerror("Error", "Error copying installation folder: {}".format(e))
+        return
     log("Copied installation folder from {} to {}".format(to_copy_install, pz_backup_path / "install"))
 
     # copy the cache folder
-    log("Copying cache folder...")
-    shutil.copytree(pz_cache_path, pz_backup_path / "cache", dirs_exist_ok=True)
+    log("Copying cache folder... (this can take some time)")
+    try:
+        shutil.copytree(pz_cache_path, pz_backup_path / "cache", dirs_exist_ok=True)
+    except Exception as e:
+        log("Error copying cache folder: {}".format(e))
+        messagebox.showerror("Error", "Error copying cache folder: {}".format(e))
+        return
     log("Copied cache folder from {} to {}".format(pz_cache_path, pz_backup_path / "cache"))
 
     # load and find mods 
