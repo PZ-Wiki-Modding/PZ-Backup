@@ -30,3 +30,6 @@ The application will do the following steps to create a backup of your game:
 - It will create a shortcut to launch the game inside that backup folder (`ProjectZomboid64.exe` on Windows, `projectzomboid.sh` on Linux). It will pass [two launch arguments](https://pzwiki.net/wiki/Startup_parameters#Game_arguments) to the game:
   - `-nosteam` to prevent the game from loading Workshop mods, and instead will only use the mods that were copied to the new installation cache folder.
   - `-cachedir=[path/to/the/new/cache/folder]` to tell the game to use the copy of the cache folder that was created earlier.
+
+## License and contact
+This project was created by me SimKDT and is open-source, licensed under a custom license, see the [LICENSE](LICENSE) file for more details. You can easily contact me on the [official Discord](https://pzwiki.net/wiki/Discord#Official_server) or [unofficial modding Discord](https://pzwiki.net/wiki/PZ_Modding_Community).
